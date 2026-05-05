@@ -36,3 +36,28 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(section);
     });
 });
+
+// Hero Video Sequential Looping
+document.addEventListener('DOMContentLoaded', () => {
+    const heroVideo = document.getElementById('hero-video');
+    if (heroVideo) {
+        const videos = [
+            'assets/videos/video1.mp4',
+            'assets/videos/video2.mp4'
+        ];
+        let currentVideoIndex = 0;
+
+        function playNextVideo() {
+            heroVideo.src = videos[currentVideoIndex];
+            heroVideo.play().catch(error => {
+                console.log("Video autoplay was prevented. User interaction might be required.", error);
+            });
+            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+        }
+
+        heroVideo.addEventListener('ended', playNextVideo);
+
+        // Initial play
+        playNextVideo();
+    }
+});

@@ -89,12 +89,37 @@ nav {
 /* Hero Section */
 .hero {
     height: 80vh;
-    background: linear-gradient(rgba(0, 33, 71, 0.8), rgba(0, 33, 71, 0.8)), url('../images/hero-bg.jpg') center/cover no-repeat;
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: var(--white);
+}
+
+.video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.video-background video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 33, 71, 0.7), rgba(0, 33, 71, 0.7));
 }
 
 .hero-content h1 {
