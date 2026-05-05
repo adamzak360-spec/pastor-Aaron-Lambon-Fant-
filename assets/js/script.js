@@ -13,30 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
-            });
-        });
-    });
-
-    // Scroll Animations (Simple implementation)
-    const observerOptions = {
-        threshold: 0.1
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
             }
         });
-    }, observerOptions);
-
-    document.querySelectorAll('section').forEach(section => {
-        observer.observe(section);
     });
 
-    // Hero Video Sequential Looping - OPTIMIZED FOR INSTANT PLAYBACK
+    // Hero Video Sequential Looping - FIXED FOR VISIBILITY
     const heroVideo = document.getElementById('hero-video');
     if (heroVideo) {
         const videos = [
@@ -45,278 +29,255 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         let currentVideoIndex = 0;
 
-        // Set initial source with autoplay attributes
-        heroVideo.autoplay = true;
-        heroVideo.muted = true;
-        heroVideo.playsinline = true;
-        heroVideo.preload = 'auto';
-        heroVideo.src = videos[0];
-        heroVideo.load();
-
-        function playNextVideo() {
-            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-            heroVideo.src = videos[currentVideoIndex];
-            heroVideo.preload = 'auto';
+        const setupVideo = (index) => {
+            heroVideo.src = videos[index];
+            heroVideo.muted = true;
+            heroVideo.autoplay = true;
+            heroVideo.playsInline = true;
             heroVideo.load();
-            heroVideo.play().catch(error => {
-                console.log("Video autoplay was prevented.", error);
-            });
-        }
+            
+            const playPromise = heroVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Autoplay prevented, waiting for interaction");
+                });
+            }
+        };
 
-        heroVideo.addEventListener('ended', playNextVideo);
+        setupVideo(0);
 
-        // Attempt initial play
-        heroVideo.play().catch(error => {
-            console.log("Initial autoplay prevented. Waiting for user interaction.", error);
-            // Add a click listener to the document to start video if autoplay is blocked
-            document.addEventListener('click', () => {
-                heroVideo.play();
-            }, { once: true });
+        heroVideo.addEventListener('ended', () => {
+            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+            setupVideo(currentVideoIndex);
         });
+
+        // Fallback for browsers that block autoplay
+        document.addEventListener('click', () => {
+            if (heroVideo.paused) heroVideo.play();
+        }, { once: true });
     }
 
-    // Gallery and Video Interaction Features
+    // Interaction State Management
+    const getStorage = (key) => JSON.parse(localStorage.getItem(key) || '{}');
+    const setStorage = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+
     const initializeMediaInteractions = () => {
+        // Persistent States
+        let likes = getStorage('mediaLikes'); // { mediaId: boolean }
+        let likeCounts = getStorage('mediaLikeCounts'); // { mediaId: number }
+        let comments = getStorage('mediaComments'); // { mediaId: Array }
+
         // Create comment modal HTML
-        const commentModalHTML = `
-            <div id="comment-modal" class="comment-modal">
-                <div class="comment-modal-content">
-                    <div class="comment-modal-header">
-                        <h3>Comments</h3>
-                        <button class="comment-close-btn">&times;</button>
-                    </div>
-                    <div class="comment-modal-body">
-                        <div class="comments-list"></div>
-                        <div class="comment-input-section">
-                            <textarea class="comment-input" placeholder="Share your thoughts..."></textarea>
-                            <button class="comment-submit-btn">Post Comment</button>
+        if (!document.getElementById('comment-modal')) {
+            const modalHTML = `
+                <div id="comment-modal" class="comment-modal">
+                    <div class="comment-modal-content">
+                        <div class="comment-modal-header">
+                            <h3>Comments</h3>
+                            <button class="comment-close-btn">&times;</button>
+                        </div>
+                        <div class="comment-modal-body">
+                            <div class="comments-list"></div>
+                            <div class="comment-input-section">
+                                <input type="text" class="comment-name-input" placeholder="Your Name">
+                                <textarea class="comment-text-input" placeholder="Write your comment..."></textarea>
+                                <button class="comment-submit-btn">Post Comment</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
-        
-        // Add modal to body if not already present
-        if (!document.getElementById('comment-modal')) {
-            document.body.insertAdjacentHTML('beforeend', commentModalHTML);
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
 
-        const commentModal = document.getElementById('comment-modal');
-        const closeBtn = document.querySelector('.comment-close-btn');
-        const commentInput = document.querySelector('.comment-input');
-        const submitBtn = document.querySelector('.comment-submit-btn');
-        const commentsList = document.querySelector('.comments-list');
-        let currentMediaId = null;
-        let mediaComments = {};
+        const modal = document.getElementById('comment-modal');
+        const closeBtn = modal.querySelector('.comment-close-btn');
+        const nameInput = modal.querySelector('.comment-name-input');
+        const textInput = modal.querySelector('.comment-text-input');
+        const submitBtn = modal.querySelector('.comment-submit-btn');
+        const list = modal.querySelector('.comments-list');
+        let activeMediaId = null;
 
-        // Close modal
-        closeBtn.addEventListener('click', () => {
-            commentModal.classList.remove('active');
-        });
-
-        // Close modal when clicking outside
-        commentModal.addEventListener('click', (e) => {
-            if (e.target === commentModal) {
-                commentModal.classList.remove('active');
-            }
-        });
-
-        // Submit comment
-        submitBtn.addEventListener('click', () => {
-            const text = commentInput.value.trim();
-            if (text && currentMediaId) {
-                if (!mediaComments[currentMediaId]) {
-                    mediaComments[currentMediaId] = [];
-                }
-                
-                const comment = {
-                    id: Date.now(),
-                    text: text,
-                    author: 'Anonymous',
-                    timestamp: new Date().toLocaleString(),
-                    likes: 0
-                };
-                
-                mediaComments[currentMediaId].push(comment);
-                commentInput.value = '';
-                renderComments(currentMediaId);
-                
-                // Save to localStorage
-                localStorage.setItem('mediaComments', JSON.stringify(mediaComments));
-            }
-        });
-
-        // Allow Enter key to submit
-        commentInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                submitBtn.click();
-            }
-        });
-
-        function renderComments(mediaId) {
-            commentsList.innerHTML = '';
-            const comments = mediaComments[mediaId] || [];
-            
-            if (comments.length === 0) {
-                commentsList.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+        const renderComments = (mediaId) => {
+            list.innerHTML = '';
+            const mediaComments = comments[mediaId] || [];
+            if (mediaComments.length === 0) {
+                list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No comments yet.</p>';
                 return;
             }
-            
-            comments.forEach(comment => {
-                const commentEl = document.createElement('div');
-                commentEl.className = 'comment-item';
-                commentEl.innerHTML = `
+            mediaComments.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'comment-item';
+                item.innerHTML = `
                     <div class="comment-header">
-                        <strong>${comment.author}</strong>
-                        <span class="comment-time">${comment.timestamp}</span>
+                        <strong>${c.name}</strong>
+                        <span class="comment-time">${c.date}</span>
                     </div>
-                    <p class="comment-text">${comment.text}</p>
-                    <div class="comment-actions">
-                        <button class="comment-like-btn" data-comment-id="${comment.id}">
-                            <i class="fas fa-thumbs-up"></i> Like (${comment.likes})
+                    <p class="comment-text">${c.text}</p>
+                `;
+                list.appendChild(item);
+            });
+            list.scrollTop = list.scrollHeight;
+        };
+
+        const updateButtonUI = (mediaId, btn) => {
+            const countSpan = btn.querySelector('.action-count');
+            if (btn.classList.contains('like-btn')) {
+                if (likes[mediaId]) {
+                    btn.classList.add('liked');
+                } else {
+                    btn.classList.remove('liked');
+                }
+                countSpan.textContent = likeCounts[mediaId] || 0;
+            } else if (btn.classList.contains('comment-btn')) {
+                countSpan.textContent = (comments[mediaId] || []).length;
+            }
+        };
+
+        // Initialize each media item
+        document.querySelectorAll('.gallery-item, .card').forEach((item, idx) => {
+            // Use a unique ID based on content if possible, otherwise index
+            const img = item.querySelector('img');
+            const iframe = item.querySelector('iframe');
+            const mediaId = (img ? img.src : (iframe ? iframe.src : 'media-' + idx)).split('/').pop();
+            
+            item.setAttribute('data-media-id', mediaId);
+
+            // Wrap gallery images in container for styling
+            if (item.classList.contains('gallery-item')) {
+                const imgEl = item.querySelector('img');
+                const overlay = item.querySelector('.gallery-overlay');
+                if (imgEl && !item.querySelector('.gallery-img-container')) {
+                    const container = document.createElement('div');
+                    container.className = 'gallery-img-container';
+                    item.insertBefore(container, imgEl);
+                    container.appendChild(imgEl);
+                    if (overlay) container.appendChild(overlay);
+                }
+            }
+
+            // Add actions if not present
+            if (!item.querySelector('.media-actions')) {
+                const actionsHTML = `
+                    <div class="media-actions">
+                        <button class="media-action-btn like-btn">
+                            <i class="fas fa-heart"></i>
+                            <span class="action-count">0</span>
+                        </button>
+                        <button class="media-action-btn comment-btn">
+                            <i class="fas fa-comment"></i>
+                            <span class="action-count">0</span>
+                        </button>
+                        <button class="media-action-btn share-btn">
+                            <i class="fas fa-share-alt"></i>
+                            <span>Share</span>
+                        </button>
+                        <button class="media-action-btn fullview-btn">
+                            <i class="fas fa-expand"></i>
+                            <span>Full</span>
                         </button>
                     </div>
                 `;
-                
-                const likeBtn = commentEl.querySelector('.comment-like-btn');
-                likeBtn.addEventListener('click', () => {
-                    comment.likes++;
-                    localStorage.setItem('mediaComments', JSON.stringify(mediaComments));
-                    renderComments(mediaId);
-                });
-                
-                commentsList.appendChild(commentEl);
-            });
-        }
+                item.insertAdjacentHTML('beforeend', actionsHTML);
+            }
 
-        // Open comment modal
-        function openCommentModal(mediaId) {
-            currentMediaId = mediaId;
-            renderComments(mediaId);
-            commentModal.classList.add('active');
-            commentInput.focus();
-        }
-
-        // Initialize media action buttons
-        document.querySelectorAll('.gallery-item, .card .video-container').forEach((item, index) => {
-            const mediaId = `media-${index}`;
-            item.setAttribute('data-media-id', mediaId);
-            
-            // Create action buttons container
-            const actionsHTML = `
-                <div class="media-actions">
-                    <button class="media-action-btn like-btn" title="Like">
-                        <i class="fas fa-heart"></i>
-                        <span class="action-count">0</span>
-                    </button>
-                    <button class="media-action-btn comment-btn" title="Comment">
-                        <i class="fas fa-comment"></i>
-                        <span class="action-count">0</span>
-                    </button>
-                    <button class="media-action-btn share-btn" title="Share">
-                        <i class="fas fa-share-alt"></i>
-                    </button>
-                    <button class="media-action-btn fullview-btn" title="View Full">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                </div>
-            `;
-            
-            item.insertAdjacentHTML('beforeend', actionsHTML);
+            // Initial UI Update
+            item.querySelectorAll('.media-action-btn').forEach(btn => updateButtonUI(mediaId, btn));
         });
 
-        // Attach event listeners to action buttons
-        document.querySelectorAll('.media-action-btn').forEach(btn => {
-            const mediaItem = btn.closest('.gallery-item, .card .video-container');
-            const mediaId = mediaItem.getAttribute('data-media-id');
-            
+        // Event Delegation for Actions
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.media-action-btn');
+            if (!btn) return;
+
+            const item = btn.closest('.gallery-item, .card');
+            const mediaId = item.getAttribute('data-media-id');
+
             if (btn.classList.contains('like-btn')) {
-                btn.addEventListener('click', () => {
-                    btn.classList.toggle('liked');
-                    let count = parseInt(btn.querySelector('.action-count').textContent);
-                    count = btn.classList.contains('liked') ? count + 1 : count - 1;
-                    btn.querySelector('.action-count').textContent = count;
-                });
+                if (likes[mediaId]) {
+                    delete likes[mediaId];
+                    likeCounts[mediaId] = Math.max(0, (likeCounts[mediaId] || 1) - 1);
+                } else {
+                    likes[mediaId] = true;
+                    likeCounts[mediaId] = (likeCounts[mediaId] || 0) + 1;
+                }
+                setStorage('mediaLikes', likes);
+                setStorage('mediaLikeCounts', likeCounts);
+                updateButtonUI(mediaId, btn);
             }
-            
+
             if (btn.classList.contains('comment-btn')) {
-                btn.addEventListener('click', () => {
-                    const comments = mediaComments[mediaId] || [];
-                    btn.querySelector('.action-count').textContent = comments.length;
-                    openCommentModal(mediaId);
-                });
+                activeMediaId = mediaId;
+                renderComments(mediaId);
+                modal.classList.add('active');
             }
-            
+
             if (btn.classList.contains('share-btn')) {
-                btn.addEventListener('click', () => {
-                    if (navigator.share) {
-                        navigator.share({
-                            title: 'Check this out',
-                            text: 'Check out this amazing content!',
-                            url: window.location.href
-                        }).catch(err => console.log('Share failed:', err));
-                    } else {
-                        alert('Share this link: ' + window.location.href);
-                    }
-                });
+                const url = window.location.href;
+                if (navigator.share) {
+                    navigator.share({ title: 'Pastor Aaron Lambon Fant', url: url });
+                } else {
+                    navigator.clipboard.writeText(url);
+                    alert('Link copied to clipboard!');
+                }
             }
-            
+
             if (btn.classList.contains('fullview-btn')) {
-                btn.addEventListener('click', () => {
-                    const img = mediaItem.querySelector('img');
-                    const video = mediaItem.querySelector('video');
-                    const iframe = mediaItem.querySelector('iframe');
-                    
-                    if (img) {
-                        openFullViewModal(img.src, 'image');
-                    } else if (video) {
-                        openFullViewModal(video.src, 'video');
-                    } else if (iframe) {
-                        openFullViewModal(iframe.src, 'iframe');
-                    }
-                });
+                const img = item.querySelector('img');
+                const iframe = item.querySelector('iframe');
+                const video = item.querySelector('video');
+                
+                let content = '';
+                if (img) content = `<img src="${img.src}">`;
+                else if (video) content = `<video src="${video.src}" controls autoplay></video>`;
+                else if (iframe) content = `<iframe src="${iframe.src}" frameborder="0" allowfullscreen></iframe>`;
+
+                const fullViewHTML = `
+                    <div id="fullview-modal" class="fullview-modal">
+                        <div class="fullview-content">
+                            <button class="fullview-close-btn">&times;</button>
+                            ${content}
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', fullViewHTML);
+                const fvModal = document.getElementById('fullview-modal');
+                fvModal.querySelector('.fullview-close-btn').onclick = () => fvModal.remove();
+                fvModal.onclick = (e) => { if (e.target === fvModal) fvModal.remove(); };
             }
         });
 
-        // Full view modal
-        function openFullViewModal(src, type) {
-            const fullViewHTML = `
-                <div id="fullview-modal" class="fullview-modal">
-                    <div class="fullview-content">
-                        <button class="fullview-close-btn">&times;</button>
-                        ${type === 'image' ? `<img src="${src}" alt="Full view">` : ''}
-                        ${type === 'video' ? `<video controls style="width:100%; height:auto;"><source src="${src}" type="video/mp4"></video>` : ''}
-                        ${type === 'iframe' ? `<iframe src="${src}" frameborder="0" allowfullscreen style="width:100%; height:600px;"></iframe>` : ''}
-                    </div>
-                </div>
-            `;
-            
-            // Remove existing modal if present
-            const existing = document.getElementById('fullview-modal');
-            if (existing) existing.remove();
-            
-            document.body.insertAdjacentHTML('beforeend', fullViewHTML);
-            
-            const modal = document.getElementById('fullview-modal');
-            const closeBtn = modal.querySelector('.fullview-close-btn');
-            
-            closeBtn.addEventListener('click', () => modal.remove());
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) modal.remove();
-            });
-        }
+        // Comment Submission
+        submitBtn.onclick = () => {
+            const name = nameInput.value.trim();
+            const text = textInput.value.trim();
+            if (!name || !text || !activeMediaId) {
+                alert('Please enter both name and comment.');
+                return;
+            }
 
-        // Load comments from localStorage
-        const savedComments = localStorage.getItem('mediaComments');
-        if (savedComments) {
-            mediaComments = JSON.parse(savedComments);
-        }
+            if (!comments[activeMediaId]) comments[activeMediaId] = [];
+            comments[activeMediaId].push({
+                name,
+                text,
+                date: new Date().toLocaleDateString()
+            });
+
+            setStorage('mediaComments', comments);
+            textInput.value = '';
+            renderComments(activeMediaId);
+            
+            // Update comment count on the button
+            const item = document.querySelector(`[data-media-id="${activeMediaId}"]`);
+            if (item) {
+                const commentBtn = item.querySelector('.comment-btn');
+                if (commentBtn) updateButtonUI(activeMediaId, commentBtn);
+            }
+        };
+
+        closeBtn.onclick = () => modal.classList.remove('active');
+        window.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
     };
 
-    // Initialize media interactions when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeMediaInteractions);
-    } else {
-        initializeMediaInteractions();
-    }
+    initializeMediaInteractions();
 });
