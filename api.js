@@ -1,8 +1,8 @@
 // Simple API handler for managing likes and comments via Upstash Redis
 // This will be called from the frontend to store and retrieve data globally
 
-const REDIS_URL = process.env.KV_REST_API_URL || 'https://special-burro-86422.upstash.io';
-const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || 'gQAAAAAAAVGWAAlgcDIyOTQ0MmM1NGQxY2I0ODA2OTkzZ mF1NThmYTI1MGU5OQ';
+const REDIS_URL = 'https://special-burro-86422.upstash.io';
+const REDIS_TOKEN = 'gQAAAAAAAVGWAAlgcDIyOTQ0MmM1NGQxY2I0ODA2OTkzZmF1NThmYTI1MGU5OQ';
 
 // Helper function to make Redis API calls
 async function redisCall(method, key, value = null) {
@@ -76,10 +76,12 @@ if (typeof window !== 'undefined') {
     };
 }
 
-module.exports = {
-    getLikesCount,
-    incrementLikes,
-    decrementLikes,
-    getComments,
-    addComment
-};
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        getLikesCount,
+        incrementLikes,
+        decrementLikes,
+        getComments,
+        addComment
+    };
+}

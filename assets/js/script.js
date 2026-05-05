@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Hero Video Sequential Looping - FIXED FOR VISIBILITY
+    // Hero Video Sequential Looping
     const heroVideo = document.getElementById('hero-video');
     if (heroVideo) {
         const videos = [
@@ -51,15 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
             setupVideo(currentVideoIndex);
         });
 
-        // Fallback for browsers that block autoplay
         document.addEventListener('click', () => {
             if (heroVideo.paused) heroVideo.play();
         }, { once: true });
     }
 
-    // Global Redis API Configuration
+    // Global Redis API Configuration - FIXED TOKEN (removed space)
     const REDIS_URL = 'https://special-burro-86422.upstash.io';
-    const REDIS_TOKEN = 'gQAAAAAAAVGWAAlgcDIyOTQ0MmM1NGQxY2I0ODA2OTkzZ mF1NThmYTI1MGU5OQ';
+    const REDIS_TOKEN = 'gQAAAAAAAVGWAAlgcDIyOTQ0MmM1NGQxY2I0ODA2OTkzZmF1NThmYTI1MGU5OQ';
 
     // Helper function to make Redis API calls
     async function redisCall(method, key, value = null) {
@@ -127,8 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const setLocalLikeState = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
     const initializeMediaInteractions = () => {
-        // Local state for tracking user's own likes (not synced)
-        let localLikes = getLocalLikeState('mediaLikes'); // { mediaId: boolean }
+        let localLikes = getLocalLikeState('mediaLikes');
 
         // Create comment modal HTML
         if (!document.getElementById('comment-modal')) {
@@ -166,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const mediaComments = await getComments(mediaId);
             list.innerHTML = '';
             if (mediaComments.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No comments yet.</p>';
+                list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No comments yet. Be the first to comment!</p>';
                 return;
             }
             mediaComments.forEach(c => {
@@ -202,14 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize each media item
         document.querySelectorAll('.gallery-item, .card').forEach((item, idx) => {
-            // Use a unique ID based on content if possible, otherwise index
             const img = item.querySelector('img');
             const iframe = item.querySelector('iframe');
             const mediaId = (img ? img.src : (iframe ? iframe.src : 'media-' + idx)).split('/').pop();
             
             item.setAttribute('data-media-id', mediaId);
 
-            // Wrap gallery images in container for styling
             if (item.classList.contains('gallery-item')) {
                 const imgEl = item.querySelector('img');
                 const overlay = item.querySelector('.gallery-overlay');
@@ -222,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Add actions if not present
             if (!item.querySelector('.media-actions')) {
                 const actionsHTML = `
                     <div class="media-actions">
@@ -247,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.insertAdjacentHTML('beforeend', actionsHTML);
             }
 
-            // Initial UI Update
             item.querySelectorAll('.media-action-btn').forEach(btn => updateButtonUI(mediaId, btn));
         });
 
@@ -289,8 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (btn.classList.contains('fullview-btn')) {
                 const img = item.querySelector('img');
-                const iframe = item.querySelector('iframe');
                 const video = item.querySelector('video');
+                const iframe = item.querySelector('iframe');
                 
                 let content = '';
                 if (img) content = `<img src="${img.src}">`;
@@ -312,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Comment Submission
         submitBtn.onclick = async () => {
             const name = nameInput.value.trim();
             const text = textInput.value.trim();
@@ -330,7 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 nameInput.value = '';
                 renderComments(activeMediaId);
                 
-                // Update comment count on the button
                 const item = document.querySelector(`[data-media-id="${activeMediaId}"]`);
                 if (item) {
                     const commentBtn = item.querySelector('.comment-btn');
