@@ -57,15 +57,78 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
     }
 
-    // Interaction State Management
-    const getStorage = (key) => JSON.parse(localStorage.getItem(key) || '{}');
-    const setStorage = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+    // Global Redis API Configuration
+    const REDIS_URL = 'https://special-burro-86422.upstash.io';
+    const REDIS_TOKEN = 'gQAAAAAAAVGWAAlgcDIyOTQ0MmM1NGQxY2I0ODA2OTkzZ mF1NThmYTI1MGU5OQ';
+
+    // Helper function to make Redis API calls
+    async function redisCall(method, key, value = null) {
+        const url = `${REDIS_URL}/${method}/${key}`;
+        const options = {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${REDIS_TOKEN}`,
+                'Content-Type': 'application/json'
+            }
+        };
+
+        if (value !== null) {
+            options.body = JSON.stringify(value);
+        }
+
+        try {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Redis call error:', error);
+            return null;
+        }
+    }
+
+    // Get likes count for a media item
+    async function getLikesCount(mediaId) {
+        const result = await redisCall('GET', `likes:${mediaId}`);
+        return result?.result ? parseInt(result.result) : 0;
+    }
+
+    // Increment likes for a media item
+    async function incrementLikes(mediaId) {
+        const result = await redisCall('INCR', `likes:${mediaId}`);
+        return result?.result || 0;
+    }
+
+    // Decrement likes for a media item
+    async function decrementLikes(mediaId) {
+        const result = await redisCall('DECR', `likes:${mediaId}`);
+        return Math.max(0, result?.result || 0);
+    }
+
+    // Get all comments for a media item
+    async function getComments(mediaId) {
+        const result = await redisCall('GET', `comments:${mediaId}`);
+        return result?.result ? JSON.parse(result.result) : [];
+    }
+
+    // Add a comment to a media item
+    async function addComment(mediaId, name, text) {
+        const comments = await getComments(mediaId);
+        comments.push({
+            name,
+            text,
+            date: new Date().toLocaleDateString()
+        });
+        await redisCall('SET', `comments:${mediaId}`, JSON.stringify(comments));
+        return comments;
+    }
+
+    // Check if user has liked this media (stored in localStorage for this session)
+    const getLocalLikeState = (key) => JSON.parse(localStorage.getItem(key) || '{}');
+    const setLocalLikeState = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
     const initializeMediaInteractions = () => {
-        // Persistent States
-        let likes = getStorage('mediaLikes'); // { mediaId: boolean }
-        let likeCounts = getStorage('mediaLikeCounts'); // { mediaId: number }
-        let comments = getStorage('mediaComments'); // { mediaId: Array }
+        // Local state for tracking user's own likes (not synced)
+        let localLikes = getLocalLikeState('mediaLikes'); // { mediaId: boolean }
 
         // Create comment modal HTML
         if (!document.getElementById('comment-modal')) {
@@ -98,9 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const list = modal.querySelector('.comments-list');
         let activeMediaId = null;
 
-        const renderComments = (mediaId) => {
+        const renderComments = async (mediaId) => {
+            list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Loading comments...</p>';
+            const mediaComments = await getComments(mediaId);
             list.innerHTML = '';
-            const mediaComments = comments[mediaId] || [];
             if (mediaComments.length === 0) {
                 list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No comments yet.</p>';
                 return;
@@ -120,17 +184,19 @@ document.addEventListener('DOMContentLoaded', () => {
             list.scrollTop = list.scrollHeight;
         };
 
-        const updateButtonUI = (mediaId, btn) => {
+        const updateButtonUI = async (mediaId, btn) => {
             const countSpan = btn.querySelector('.action-count');
             if (btn.classList.contains('like-btn')) {
-                if (likes[mediaId]) {
+                if (localLikes[mediaId]) {
                     btn.classList.add('liked');
                 } else {
                     btn.classList.remove('liked');
                 }
-                countSpan.textContent = likeCounts[mediaId] || 0;
+                const count = await getLikesCount(mediaId);
+                countSpan.textContent = count;
             } else if (btn.classList.contains('comment-btn')) {
-                countSpan.textContent = (comments[mediaId] || []).length;
+                const comments = await getComments(mediaId);
+                countSpan.textContent = comments.length;
             }
         };
 
@@ -186,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Event Delegation for Actions
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', async (e) => {
             const btn = e.target.closest('.media-action-btn');
             if (!btn) return;
 
@@ -194,15 +260,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const mediaId = item.getAttribute('data-media-id');
 
             if (btn.classList.contains('like-btn')) {
-                if (likes[mediaId]) {
-                    delete likes[mediaId];
-                    likeCounts[mediaId] = Math.max(0, (likeCounts[mediaId] || 1) - 1);
+                if (localLikes[mediaId]) {
+                    delete localLikes[mediaId];
+                    await decrementLikes(mediaId);
                 } else {
-                    likes[mediaId] = true;
-                    likeCounts[mediaId] = (likeCounts[mediaId] || 0) + 1;
+                    localLikes[mediaId] = true;
+                    await incrementLikes(mediaId);
                 }
-                setStorage('mediaLikes', likes);
-                setStorage('mediaLikeCounts', likeCounts);
+                setLocalLikeState('mediaLikes', localLikes);
                 updateButtonUI(mediaId, btn);
             }
 
@@ -248,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Comment Submission
-        submitBtn.onclick = () => {
+        submitBtn.onclick = async () => {
             const name = nameInput.value.trim();
             const text = textInput.value.trim();
             if (!name || !text || !activeMediaId) {
@@ -256,22 +321,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            if (!comments[activeMediaId]) comments[activeMediaId] = [];
-            comments[activeMediaId].push({
-                name,
-                text,
-                date: new Date().toLocaleDateString()
-            });
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Posting...';
 
-            setStorage('mediaComments', comments);
-            textInput.value = '';
-            renderComments(activeMediaId);
-            
-            // Update comment count on the button
-            const item = document.querySelector(`[data-media-id="${activeMediaId}"]`);
-            if (item) {
-                const commentBtn = item.querySelector('.comment-btn');
-                if (commentBtn) updateButtonUI(activeMediaId, commentBtn);
+            try {
+                await addComment(activeMediaId, name, text);
+                textInput.value = '';
+                nameInput.value = '';
+                renderComments(activeMediaId);
+                
+                // Update comment count on the button
+                const item = document.querySelector(`[data-media-id="${activeMediaId}"]`);
+                if (item) {
+                    const commentBtn = item.querySelector('.comment-btn');
+                    if (commentBtn) updateButtonUI(activeMediaId, commentBtn);
+                }
+            } catch (error) {
+                console.error('Error posting comment:', error);
+                alert('Error posting comment. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Post Comment';
             }
         };
 
