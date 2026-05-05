@@ -35,10 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('section').forEach(section => {
         observer.observe(section);
     });
-});
 
-// Hero Video Sequential Looping
-document.addEventListener('DOMContentLoaded', () => {
+    // Hero Video Sequential Looping
     const heroVideo = document.getElementById('hero-video');
     if (heroVideo) {
         const videos = [
@@ -47,17 +45,31 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         let currentVideoIndex = 0;
 
+        // Set initial source and preload both
+        heroVideo.src = videos[0];
+        heroVideo.load();
+
         function playNextVideo() {
+            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+            
+            // To prevent the "blank" gap, we update the source and immediately play.
+            // Using a single video element can sometimes cause a flash.
+            // But with preloading and direct src change it should be minimal.
             heroVideo.src = videos[currentVideoIndex];
             heroVideo.play().catch(error => {
-                console.log("Video autoplay was prevented. User interaction might be required.", error);
+                console.log("Video autoplay was prevented.", error);
             });
-            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
         }
 
         heroVideo.addEventListener('ended', playNextVideo);
 
-        // Initial play
-        playNextVideo();
+        // Attempt initial play
+        heroVideo.play().catch(error => {
+            console.log("Initial autoplay prevented. Waiting for user interaction.", error);
+            // Optional: add a click listener to the document to start video if autoplay is blocked
+            document.addEventListener('click', () => {
+                heroVideo.play();
+            }, { once: true });
+        });
     }
 });
