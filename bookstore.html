@@ -7,6 +7,50 @@
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .bookstore-featured {
+            padding: 60px 0;
+            background: #fff;
+        }
+        .featured-flex {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+        .featured-img {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .featured-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .featured-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        .featured-text h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        .featured-text p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        @media (max-width: 768px) {
+            .featured-flex {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -36,8 +80,27 @@
             </div>
         </section>
 
-        <section class="books-grid">
+        <section class="bookstore-featured">
             <div class="container">
+                <div class="featured-flex">
+                    <div class="featured-img">
+                        <img src="assets/images/pastor-bookstore.jpg" alt="Pastor Aaron in the Bookstore">
+                    </div>
+                    <div class="featured-text">
+                        <h2>Wisdom for the Journey</h2>
+                        <p>Explore a collection of inspired writings by Pastor Aaron Lambon Fant. Each book is crafted to provide spiritual nourishment, practical guidance, and divine insight for your Christian walk.</p>
+                        <p>From building godly homes to understanding the end-time mandate of the church, these resources are designed to transform your life and ministry.</p>
+                        <a href="#books" class="btn">Browse Books</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="books" class="books-grid" style="background: var(--light-bg); padding: 80px 0;">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Available Titles</h2>
+                </div>
                 <div class="grid">
                     <!-- Book 1 -->
                     <div class="book-card card">
