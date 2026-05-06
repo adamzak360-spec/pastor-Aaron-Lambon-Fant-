@@ -215,6 +215,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            // Media actions are hidden as per user request
+            /*
             if (!item.querySelector('.media-actions')) {
                 const actionsHTML = `
                     <div class="media-actions">
@@ -240,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             item.querySelectorAll('.media-action-btn').forEach(btn => updateButtonUI(mediaId, btn));
+            */
         });
 
         // Event Delegation for Actions
@@ -283,59 +286,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 const video = item.querySelector('video');
                 const iframe = item.querySelector('iframe');
                 
-                let content = '';
-                if (img) content = `<img src="${img.src}">`;
-                else if (video) content = `<video src="${video.src}" controls autoplay></video>`;
-                else if (iframe) content = `<iframe src="${iframe.src}" frameborder="0" allowfullscreen></iframe>`;
+                let contentHTML = '';
+                if (img) contentHTML = `<img src="${img.src}">`;
+                else if (video) contentHTML = `<video src="${video.querySelector('source').src}" controls autoplay></video>`;
+                else if (iframe) contentHTML = `<iframe src="${iframe.src}" frameborder="0" allowfullscreen></iframe>`;
 
-                const fullViewHTML = `
-                    <div id="fullview-modal" class="fullview-modal">
+                const fullviewHTML = `
+                    <div class="fullview-modal">
                         <div class="fullview-content">
                             <button class="fullview-close-btn">&times;</button>
-                            ${content}
+                            ${contentHTML}
                         </div>
                     </div>
                 `;
-                document.body.insertAdjacentHTML('beforeend', fullViewHTML);
-                const fvModal = document.getElementById('fullview-modal');
-                fvModal.querySelector('.fullview-close-btn').onclick = () => fvModal.remove();
-                fvModal.onclick = (e) => { if (e.target === fvModal) fvModal.remove(); };
+                document.body.insertAdjacentHTML('beforeend', fullviewHTML);
+                
+                document.querySelector('.fullview-close-btn').addEventListener('click', () => {
+                    document.querySelector('.fullview-modal').remove();
+                });
             }
         });
 
-        submitBtn.onclick = async () => {
-            const name = nameInput.value.trim();
-            const text = textInput.value.trim();
-            if (!name || !text || !activeMediaId) {
-                alert('Please enter both name and comment.');
-                return;
-            }
+        // Modal Close Events
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Posting...';
-
-            try {
+        // Comment Submission
+        if (submitBtn) {
+            submitBtn.addEventListener('click', async () => {
+                const name = nameInput.value.trim();
+                const text = textInput.value.trim();
+                if (!name || !text) {
+                    alert('Please enter both name and comment.');
+                    return;
+                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Posting...';
                 await addComment(activeMediaId, name, text);
-                textInput.value = '';
                 nameInput.value = '';
-                renderComments(activeMediaId);
+                textInput.value = '';
+                await renderComments(activeMediaId);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Post Comment';
                 
+                // Update the comment count on the main page
                 const item = document.querySelector(`[data-media-id="${activeMediaId}"]`);
                 if (item) {
                     const commentBtn = item.querySelector('.comment-btn');
                     if (commentBtn) updateButtonUI(activeMediaId, commentBtn);
                 }
-            } catch (error) {
-                console.error('Error posting comment:', error);
-                alert('Error posting comment. Please try again.');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Post Comment';
-            }
-        };
-
-        closeBtn.onclick = () => modal.classList.remove('active');
-        window.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
+            });
+        }
     };
 
     initializeMediaInteractions();
