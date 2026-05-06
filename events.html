@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events | Pastor Aaron Lambon Fant</title>
+    <meta name="description" content="Upcoming and past events of Pastor Aaron Lambon Fant and Sanctuary of Wind and Fire Church.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .event-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: var(--transition);
+            height: 100%;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .event-image {
+            height: 200px;
+            width: 100%;
+            object-fit: cover;
+        }
+        .event-info {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-date {
+            color: var(--secondary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .event-title {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .event-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .event-meta {
+            margin-top: auto;
+            font-size: 0.85rem;
+            color: #888;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .event-meta span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .event-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .status-upcoming {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status-past {
+            background: #f5f5f5;
+            color: #757575;
+        }
+        .event-category {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Pastor Aaron L. Fant</div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="sermons.html">Sermons</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="events.html" class="active">Events</a></li>
+                    <li><a href="bookstore.html">Bookstore</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header" style="background: var(--primary-color); color: var(--white); padding: 60px 0; text-align: center;">
+            <div class="container">
+                <h1>Ministry Events</h1>
+                <p>Join us for life-transforming encounters with God.</p>
+            </div>
+        </section>
+
+        <section class="events-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Upcoming Events</h2>
+                </div>
+                <div class="grid">
+                    <!-- Faith Convention 2026 -->
+                    <div class="event-card">
+                        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=800&q=80" alt="Faith Convention 2026" class="event-image">
+                        <div class="event-info">
+                            <span class="event-status status-upcoming">Upcoming</span>
+                            <span class="event-category">Conference</span>
+                            <h3 class="event-title">Faith Convention 2026</h3>
+                            <p class="event-description">"Ignite Your Spirit" - Join us for three nights of spiritual fire and divine direction with our host, Rev. Aaron Lambon Fant.</p>
+                            <div class="event-date">
+                                <i class="far fa-calendar-alt"></i> May 20 - 22, 2026
+                            </div>
+                            <div class="event-meta">
+                                <span><i class="far fa-clock"></i> 6:00 PM GMT</span>
+                                <span><i class="fas fa-map-marker-alt"></i> Sanctuary of Wind and Fire AG, Tamale</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cedar International Day 2026 -->
+                    <div class="event-card">
+                        <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80" alt="Cedar International Day" class="event-image">
+                        <div class="event-info">
+                            <span class="event-status status-upcoming">Upcoming</span>
+                            <span class="event-category">Special Service</span>
+                            <h3 class="event-title">Cedar International Day 2026</h3>
+                            <p class="event-description">A celebration of diversity and unity in the body of Christ. Special ministration by Pastor Aaron Lambon Fant.</p>
+                            <div class="event-date">
+                                <i class="far fa-calendar-alt"></i> May 25, 2026
+                            </div>
+                            <div class="event-meta">
+                                <span><i class="far fa-clock"></i> 7:00 PM GMT</span>
+                                <span><i class="fas fa-globe"></i> Online & In-person</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin-top: 80px;">
+                    <h2>Past Events</h2>
+                </div>
+                <div class="grid">
+                    <!-- Festival of Wonders 2025 -->
+                    <div class="event-card">
+                        <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80" alt="Festival of Wonders 2025" class="event-image">
+                        <div class="event-info">
+                            <span class="event-status status-past">Completed</span>
+                            <span class="event-category">Festival</span>
+                            <h3 class="event-title">Festival of Wonders 2025</h3>
+                            <p class="event-description">Experience the recap of divine insights and spiritual upliftment from our annual wonder festival.</p>
+                            <div class="event-date">
+                                <i class="far fa-calendar-alt"></i> January 2025
+                            </div>
+                            <div class="event-meta">
+                                <span><i class="fas fa-check-circle"></i> Successfully Concluded</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alive Conference 2025 -->
+                    <div class="event-card">
+                        <img src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=800&q=80" alt="Alive Conference 2025" class="event-image">
+                        <div class="event-info">
+                            <span class="event-status status-past">Completed</span>
+                            <span class="event-category">Conference</span>
+                            <h3 class="event-title">Alive Conference 2025</h3>
+                            <p class="event-description">Theme: "Separated and Consecrated unto God". A deep dive into Romans 12:1-2.</p>
+                            <div class="event-date">
+                                <i class="far fa-calendar-alt"></i> December 2024
+                            </div>
+                            <div class="event-meta">
+                                <span><i class="fas fa-check-circle"></i> Successfully Concluded</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Supernatural Encounter Service -->
+                    <div class="event-card">
+                        <img src="https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&w=800&q=80" alt="Supernatural Encounter" class="event-image">
+                        <div class="event-info">
+                            <span class="event-status status-past">Completed</span>
+                            <span class="event-category">Service</span>
+                            <h3 class="event-title">Supernatural Encounter Service</h3>
+                            <p class="event-description">Special ministration by Pastor Aaron Fant in Accra. Focus on Genesis 18:1-15.</p>
+                            <div class="event-date">
+                                <i class="far fa-calendar-alt"></i> February 9, 2025
+                            </div>
+                            <div class="event-meta">
+                                <span><i class="fas fa-check-circle"></i> Successfully Concluded</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>About Us</h4>
+                    <p>Sanctuary of Wind and Fire Church is a spiritual haven in Tamale, Ghana, dedicated to prayer, power, and the word of God.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">Our Story</a></li>
+                        <li><a href="sermons.html">Sermons</a></li>
+                        <li><a href="events.html">Events</a></li>
+                        <li><a href="bookstore.html">Bookstore</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact Info</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Kanvilli-Tuunaayilli Road, Tamale, Ghana</p>
+                    <p><i class="fas fa-phone"></i> +233 24 973 9801</p>
+                    <p><i class="fas fa-envelope"></i> info@pastoraaronfant.com</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/profile.php?id=100045485439447"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Pastor Aaron Lambon Fant. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/233249739801" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="assets/js/script.js"></script>
+</body>
+</html>
