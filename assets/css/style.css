@@ -221,6 +221,14 @@ section {
     flex-direction: column;
 }
 
+.card-content {
+    padding: 20px;
+}
+
+.card.no-actions .media-actions {
+    display: none;
+}
+
 .card:hover {
     transform: translateY(-10px);
 }
