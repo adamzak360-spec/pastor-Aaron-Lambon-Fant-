@@ -21,39 +21,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Hero Video Sequential Looping
-    const heroVideo = document.getElementById('hero-video');
-    if (heroVideo) {
-        const videos = [
-            'assets/videos/video1.mp4',
-            'assets/videos/video2.mp4'
-        ];
-        let currentVideoIndex = 0;
+    const video1 = document.getElementById('hero-video-1');
+    const video2 = document.getElementById('hero-video-2');
+    
+    if (video1 && video2) {
+        const videos = [video1, video2];
+        let currentIdx = 0;
 
-        const setupVideo = (index) => {
-            heroVideo.src = videos[index];
-            heroVideo.muted = true;
-            heroVideo.autoplay = true;
-            heroVideo.playsInline = true;
-            heroVideo.load();
-            
-            const playPromise = heroVideo.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Autoplay prevented, waiting for interaction");
-                });
-            }
+        const playNext = () => {
+            const currentVideo = videos[currentIdx];
+            const nextIdx = (currentIdx + 1) % videos.length;
+            const nextVideo = videos[nextIdx];
+
+            // Start playing next video before current one ends to ensure smooth transition
+            nextVideo.currentTime = 0;
+            nextVideo.play().then(() => {
+                nextVideo.classList.add('active');
+                currentVideo.classList.remove('active');
+                currentIdx = nextIdx;
+            }).catch(err => console.log("Video play error:", err));
         };
 
-        setupVideo(0);
+        video1.addEventListener('ended', playNext);
+        video2.addEventListener('ended', playNext);
 
-        heroVideo.addEventListener('ended', () => {
-            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-            setupVideo(currentVideoIndex);
+        // Initial play attempt for video1
+        video1.play().catch(() => {
+            document.addEventListener('click', () => {
+                video1.play();
+            }, { once: true });
         });
-
-        document.addEventListener('click', () => {
-            if (heroVideo.paused) heroVideo.play();
-        }, { once: true });
     }
 
     // Global Redis API Configuration - FIXED TOKEN (removed space)
