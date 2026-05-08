@@ -345,3 +345,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initializeMediaInteractions();
 });
+
+
+    // Flyer Carousel Functionality
+    const initializeCarousel = () => {
+        const carouselTrack = document.getElementById('carouselTrack');
+        const dots = document.querySelectorAll('.dot');
+        
+        if (!carouselTrack) return;
+        
+        let currentSlide = 0;
+        const totalSlides = 3; // Number of unique flyers
+        
+        // Update dots
+        const updateDots = (index) => {
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        };
+        
+        // Handle dot clicks
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentSlide = index;
+                updateDots(currentSlide);
+                // Pause animation briefly when user clicks
+                carouselTrack.classList.add('paused');
+                setTimeout(() => {
+                    carouselTrack.classList.remove('paused');
+                }, 3000);
+            });
+        });
+        
+        // Update dots on page load
+        updateDots(0);
+        
+        // Optional: Sync dots with carousel scroll position
+        // This creates a more interactive experience
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Carousel is visible
+                }
+            });
+        });
+        
+        observer.observe(carouselTrack);
+    };
+    
+    // Initialize carousel when DOM is ready
+    initializeCarousel();
+});

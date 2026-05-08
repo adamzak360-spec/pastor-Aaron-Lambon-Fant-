@@ -107,6 +107,217 @@
             text-align: center;
             margin-bottom: 30px;
         }
+        
+        /* Flyer Carousel Styles */
+        .flyer-carousel-section {
+            background: linear-gradient(135deg, rgba(0, 33, 71, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%);
+            padding: 60px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .flyer-carousel-section::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 100px;
+            background: linear-gradient(to right, rgba(255,255,255,1), rgba(255,255,255,0));
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .flyer-carousel-section::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 100px;
+            background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        .carousel-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .carousel-header h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .carousel-header p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .carousel-track {
+            display: flex;
+            gap: 30px;
+            animation: scroll-left 40s linear infinite;
+            width: fit-content;
+        }
+        
+        .carousel-track:hover {
+            animation-play-state: paused;
+        }
+        
+        .carousel-track.paused {
+            animation-play-state: paused;
+        }
+        
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        
+        .flyer-item {
+            flex: 0 0 auto;
+            width: 320px;
+            height: auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 33, 71, 0.15);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            background: white;
+        }
+        
+        .flyer-item:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 33, 71, 0.25);
+        }
+        
+        .flyer-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 15px;
+        }
+        
+        .flyer-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+            border-radius: 15px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .flyer-item:hover::after {
+            opacity: 1;
+        }
+        
+        /* Duplicate flyers for seamless loop */
+        .carousel-track .flyer-item:nth-child(n+4) {
+            position: absolute;
+            left: 100%;
+        }
+        
+        .carousel-controls {
+            text-align: center;
+            margin-top: 40px;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 33, 71, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .dot.active {
+            background: var(--secondary-color);
+            transform: scale(1.3);
+            border-color: var(--primary-color);
+        }
+        
+        .carousel-info {
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .carousel-info strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .flyer-item {
+                width: 280px;
+            }
+            
+            .carousel-header h2 {
+                font-size: 2rem;
+            }
+            
+            .carousel-header p {
+                font-size: 0.95rem;
+            }
+            
+            @keyframes scroll-left {
+                0% {
+                    transform: translateX(0);
+                }
+                100% {
+                    transform: translateX(-50%);
+                }
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .flyer-item {
+                width: 240px;
+            }
+            
+            .carousel-header h2 {
+                font-size: 1.5rem;
+            }
+            
+            .carousel-header p {
+                font-size: 0.85rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -138,17 +349,60 @@
             </div>
         </section>
 
+        <!-- Flyer Carousel Section -->
+        <section class="flyer-carousel-section">
+            <div class="container">
+                <div class="carousel-header">
+                    <h2>Faith Convention 2026</h2>
+                    <p>Explore all the beautiful flyers featuring our distinguished speakers and event details</p>
+                </div>
+                
+                <div class="carousel-container">
+                    <div class="carousel-track" id="carouselTrack">
+                        <!-- Original Flyers -->
+                        <div class="flyer-item">
+                            <img src="assets/images/faith-convention-flyer-1.jpg" alt="Faith Convention Flyer 1">
+                        </div>
+                        <div class="flyer-item">
+                            <img src="assets/images/faith-convention-flyer-2.jpg" alt="Faith Convention Flyer 2">
+                        </div>
+                        <div class="flyer-item">
+                            <img src="assets/images/faith-convention-flyer-3.jpg" alt="Faith Convention Flyer 3">
+                        </div>
+                        <!-- Duplicated Flyers for Seamless Loop -->
+                        <div class="flyer-item">
+                            <img src="assets/images/faith-convention-flyer-1.jpg" alt="Faith Convention Flyer 1">
+                        </div>
+                        <div class="flyer-item">
+                            <img src="assets/images/faith-convention-flyer-2.jpg" alt="Faith Convention Flyer 2">
+                        </div>
+                        <div class="flyer-item">
+                            <img src="assets/images/faith-convention-flyer-3.jpg" alt="Faith Convention Flyer 3">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="carousel-controls">
+                    <div class="carousel-dots">
+                        <span class="dot active" data-slide="0"></span>
+                        <span class="dot" data-slide="1"></span>
+                        <span class="dot" data-slide="2"></span>
+                    </div>
+                    <div class="carousel-info">
+                        <strong>May 20 - 22, 2026</strong> | 6:00 PM GMT Each Night | Sanctuary of Wind and Fire AG, Tamale
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="events-section">
             <div class="container">
                 <div class="section-title">
-                    <h2>Upcoming Events</h2>
+                    <h2>Event Details</h2>
                 </div>
                 <div class="grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto;">
                     <!-- Faith Convention 2026 -->
                     <div class="event-card">
-                        <div class="event-flyer-container">
-                            <img src="assets/images/faith-convention-2026.jpg" alt="Faith Convention 2026 Flyer" class="event-flyer">
-                        </div>
                         <div class="event-info">
                             <span class="event-status status-upcoming">Upcoming</span>
                             <span class="event-category">Conference</span>
