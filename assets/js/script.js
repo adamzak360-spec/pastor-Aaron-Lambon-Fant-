@@ -214,35 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (overlay) container.appendChild(overlay);
                 }
             }
-
-            // Media actions are hidden as per user request
-            /*
-            if (!item.querySelector('.media-actions')) {
-                const actionsHTML = `
-                    <div class="media-actions">
-                        <button class="media-action-btn like-btn">
-                            <i class="fas fa-heart"></i>
-                            <span class="action-count">0</span>
-                        </button>
-                        <button class="media-action-btn comment-btn">
-                            <i class="fas fa-comment"></i>
-                            <span class="action-count">0</span>
-                        </button>
-                        <button class="media-action-btn share-btn">
-                            <i class="fas fa-share-alt"></i>
-                            <span>Share</span>
-                        </button>
-                        <button class="media-action-btn fullview-btn">
-                            <i class="fas fa-expand"></i>
-                            <span>Full</span>
-                        </button>
-                    </div>
-                `;
-                item.insertAdjacentHTML('beforeend', actionsHTML);
-            }
-
-            item.querySelectorAll('.media-action-btn').forEach(btn => updateButtonUI(mediaId, btn));
-            */
         });
 
         // Event Delegation for Actions
@@ -344,8 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     initializeMediaInteractions();
-});
-
 
     // Flyer Carousel Functionality
     const initializeCarousel = () => {
@@ -355,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!carouselTrack) return;
         
         let currentSlide = 0;
-        const totalSlides = 3; // Number of unique flyers
         
         // Update dots
         const updateDots = (index) => {
@@ -383,20 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update dots on page load
         updateDots(0);
-        
-        // Optional: Sync dots with carousel scroll position
-        // This creates a more interactive experience
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    // Carousel is visible
-                }
-            });
-        });
-        
-        observer.observe(carouselTrack);
     };
     
-    // Initialize carousel when DOM is ready
+    // Initialize carousel
     initializeCarousel();
 });
