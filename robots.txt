@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pastor-aaron-lambon-fant.vercel.app/sitemap.xml
