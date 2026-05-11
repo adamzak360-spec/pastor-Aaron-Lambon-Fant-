@@ -216,6 +216,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Event Delegation for View Button
+        document.addEventListener('click', (e) => {
+            const viewBtn = e.target.closest('.view-btn');
+            if (viewBtn) {
+                const item = viewBtn.closest('.gallery-item');
+                const img = item.querySelector('img');
+                
+                if (img) {
+                    const fullviewHTML = `
+                        <div class="fullview-modal">
+                            <div class="fullview-content">
+                                <button class="fullview-close-btn">&times;</button>
+                                <img src="${img.src}" alt="${img.alt}" style="max-width: 100%; max-height: 90vh; object-fit: contain;">
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', fullviewHTML);
+                    
+                    const modal = document.querySelector('.fullview-modal');
+                    const closeBtn = modal.querySelector('.fullview-close-btn');
+                    
+                    closeBtn.addEventListener('click', () => {
+                        modal.remove();
+                    });
+                    
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.remove();
+                        }
+                    });
+                }
+            }
+        });
+
         // Event Delegation for Actions
         document.addEventListener('click', async (e) => {
             const btn = e.target.closest('.media-action-btn');
